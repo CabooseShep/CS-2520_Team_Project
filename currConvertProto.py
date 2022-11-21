@@ -1,20 +1,28 @@
+# Authors: Chin Leemattanant, Bryson Tang, Nick Hortua
+# Assignment: Team Project
+# Completed (or last revised): TBA
+
 from tkinter import *
 import requests
 
 root = Tk()     # creating a tkinter object
 
-def conversionResult():
+def conversionResult(entry):
     "handles the math for conversion from [] to []"
     fromVar = str(fclicked.get())  # the currency we are converting FROM. selected by the user in the dropdown menu
-    url = 'https://v6.exchangerate-api.com/v6/730f858ff18799bd4656f3e6/latest/'+fromVar
+    toVar = str(tclicked.get())     # the currency we are converting TO. selected by the user in the dropdown menu
+    url = 'https://v6.exchangerate-api.com/v6/730f858ff18799bd4656f3e6/pair/'+fromVar + '/' +toVar
     response = requests.get(url)
     data = response.json()
-    toVar = str(tclicked.get())     # the currency we are converting TO. selected by the user in the dropdown menu
-    return str(data["conversion_rates"][toVar])     # the data we get is a large dictionary of many things. in this case the dictionary holds another dictionary of all of the conversions. We refer to that nested dictionary and pull out the value to return it.
+    return str(round(data["conversion_rate"] * float(entry), 2))     # the data we get is a large dictionary of many things. in this case the dictionary holds another dictionary containing the API responses. we refer to that nested dictionary and pull the value tied to "conversion_rate"
 
 def convertButtonEvent():
     "the event function for the convertButton, this button will update the resultLabel accordingly"
-    resultLabel.config(text= "1 "+str(fclicked.get())+" is equivalent to "+conversionResult()+" "+str(tclicked.get()), font="Courier")
+    entry = inputBox.get()
+    try:
+        resultLabel.config(text= entry + " " + str(fclicked.get())+" is equivalent to "+ conversionResult(float(entry)) +" "+str(tclicked.get()), font="Courier")
+    except ValueError:
+        resultLabel.config(text = "Enter the currency value you want to convert in floating point format.", font = "Courier")
 
 def dropEvent(x):       # update the buttons text as user selects options
     convertButton.config(text="Convert from "+str(fclicked.get())+" to "+str(tclicked.get()))
@@ -27,6 +35,9 @@ fromLabel = Label(root, text="Convert from:", padx=10, font="Courier")  # settin
 fromLabel.grid(row=1, column=0) # packing it.
 toLabel = Label(root, text="Convert to:", padx=10, font="Courier")  # setting up another label for the user to select a TO currency
 toLabel.grid(row=1, column=2)   # packing it.
+
+inputBox = Entry(root)
+inputBox.grid(row= 2,column = 1)
 
 fromOptions = [
     "AED",
